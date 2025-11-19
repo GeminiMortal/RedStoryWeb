@@ -2,6 +2,13 @@ import multer from 'multer';
 import path from 'path';
 import { put } from '@vercel/blob';
 import dotenv from 'dotenv';
+import fs from 'fs';
+
+// 确保uploads目录存在
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 dotenv.config();
 
@@ -30,27 +37,46 @@ export const upload = multer({
   }
 });
 
-// 上传文件到Vercel Blob的函数
-export const uploadToBlob = async (file: Express.Multer.File): Promise<string> => {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    throw new Error('BLOB_READ_WRITE_TOKEN is not set');
-  }
-
+// 保存文件到本地的函数
+const saveFileLocally = (file: Express.Multer.File): string => {
   // 生成唯一文件名
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
   const fileExtension = path.extname(file.originalname);
-  const filename = `red-story/${uniqueSuffix}${fileExtension}`;
+  const filename = `${uniqueSuffix}${fileExtension}`;
+  const filePath = path.join(uploadDir, filename);
 
-  try {
-    // 上传到Vercel Blob
-    const blob = await put(filename, file.buffer, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
+  // 保存文件到本地
+  fs.writeFileSync(filePath, file.buffer);
 
-    return blob.url;
-  } catch (error) {
-    console.error('Vercel Blob上传失败:', error);
-    throw new Error('文件上传到云端失败');
+  // 返回相对URL
+  return `/uploads/${filename}`;
+};
+
+// 上传文件的函数（优先使用Vercel Blob，失败时使用本地存储）
+export const uploadToBlob = async (file: Express.Multer.File): Promise<string> => {
+  // 检查是否配置了Vercel Blob
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // 生成唯一文件名
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const fileExtension = path.extname(file.originalname);
+    const filename = `red-story/${uniqueSuffix}${fileExtension}`;
+
+    try {
+      // 上传到Vercel Blob
+      const blob = await put(filename, file.buffer, {
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+
+      return blob.url;
+    } catch (error) {
+      console.error('Vercel Blob上传失败，将使用本地存储:', error);
+      // Vercel Blob上传失败，使用本地存储
+      return saveFileLocally(file);
+    }
+  } else {
+    console.warn('BLOB_READ_WRITE_TOKEN未配置，将使用本地存储');
+    // 未配置Vercel Blob，使用本地存储
+    return saveFileLocally(file);
   }
 };
