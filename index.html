@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码里的红色记忆</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+    <style>
+        /* 基础样式 */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        .carousel-container {
+            margin-top: 20px;
+        }
+        
+        .carousel-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .carousel-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .carousel-item h3 {
+            color: #dc3545;
+            margin-bottom: 10px;
+        }
+        
+        .carousel-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        /* 响应式设计 */
+        @media (min-width: 768px) {
+            .carousel-row {
+                display: flex;
+                flex-direction: column;
+                height: 600px;
+                overflow-y: auto;
+                margin-bottom: 20px;
+            }
+            
+            .carousel-row:nth-child(even) {
+                direction: rtl;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .carousel-row {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- 上传按钮 -->
+        <a href="upload.html" class="btn btn-danger upload-btn">
+            <i class="fa fa-upload"></i> 上传红色故事
+        </a>
+        
+        <h1 class="text-center text-danger mt-5">代码里的红色记忆</h1>
+        
+        <!-- 轮播容器 -->
+        <div class="carousel-container">
+            <div class="row">
+                <!-- 轮播行1 -->
+                <div class="col-md-4 carousel-row">
+                    <div v-for="story in stories[0]" :key="story.id" class="carousel-item" @click="nextStory(0, story)">
+                        <h3>{{ story.title }}</h3>
+                        <img v-if="story.image" :src="story.image" alt="故事图片">
+                        <p>{{ story.content.substring(0, 100) }}...</p>
+                    </div>
+                </div>
+                
+                <!-- 轮播行2 -->
+                <div class="col-md-4 carousel-row">
+                    <div v-for="story in stories[1]" :key="story.id" class="carousel-item" @click="nextStory(1, story)">
+                        <h3>{{ story.title }}</h3>
+                        <img v-if="story.image" :src="story.image" alt="故事图片">
+                        <p>{{ story.content.substring(0, 100) }}...</p>
+                    </div>
+                </div>
+                
+                <!-- 轮播行3 -->
+                <div class="col-md-4 carousel-row">
+                    <div v-for="story in stories[2]" :key="story.id" class="carousel-item" @click="nextStory(2, story)">
+                        <h3>{{ story.title }}</h3>
+                        <img v-if="story.image" :src="story.image" alt="故事图片">
+                        <p>{{ story.content.substring(0, 100) }}...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                stories: [[], [], []] // 三个轮播行
+            },
+            mounted() {
+                this.loadStories();
+            },
+            methods: {
+                loadStories() {
+                    // 从后端加载红色故事数据
+                    axios.get('api/getStories.php')
+                        .then(response => {
+                            if (response.data.success) {
+                                this.distributeStories(response.data.stories);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('加载故事失败:', error);
+                        });
+                },
+                distributeStories(stories) {
+                    // 将故事分配到三个轮播行中，优先分配到内容最少的行
+                    stories.forEach(story => {
+                        let minIndex = 0;
+                        let minLength = this.stories[0].length;
+                        
+                        for (let i = 1; i < this.stories.length; i++) {
+                            if (this.stories[i].length < minLength) {
+                                minLength = this.stories[i].length;
+                                minIndex = i;
+                            }
+                        }
+                        
+                        this.stories[minIndex].push(story);
+                    });
+                },
+                nextStory(rowIndex, currentStory) {
+                    // 切换到下一个故事的逻辑
+                    const row = this.stories[rowIndex];
+                    const currentIndex = row.indexOf(currentStory);
+                    const nextIndex = (currentIndex + 1) % row.length;
+                    
+                    // 简单的动画效果
+                        $(`.carousel-row:eq(${rowIndex}) .carousel-item`).fadeOut(300, () => {
+                            // 这里可以实现更复杂的轮播逻辑
+                            $(`.carousel-row:eq(${rowIndex}) .carousel-item`).fadeIn(300);
+                        });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

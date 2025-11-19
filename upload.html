@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传红色故事</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+    <!-- Redactor CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/redactor@10.2.5/redactor.css" rel="stylesheet">
+    <!-- Redactor JS -->
+    <script src="https://cdn.jsdelivr.net/npm/redactor@10.2.5/redactor.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .back-btn {
+            margin-bottom: 20px;
+        }
+        
+        #redactor {
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <a href="index.html" class="btn btn-secondary back-btn">
+            <i class="fa fa-arrow-left"></i> 返回首页
+        </a>
+        
+        <h1 class="text-center text-danger mb-5">上传红色故事</h1>
+        
+        <form @submit.prevent="submitForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title" class="form-label">故事标题</label>
+                <input type="text" id="title" v-model="story.title" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="content" class="form-label">故事内容</label>
+                <textarea id="redactor" v-model="story.content"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="image" class="form-label">故事图片</label>
+                <input type="file" id="image" @change="handleImageUpload" class="form-control">
+            </div>
+            
+            <button type="submit" class="btn btn-danger w-100">
+                <i class="fa fa-upload"></i> 上传故事
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                story: {
+                    title: '',
+                    content: '',
+                    image: null
+                }
+            },
+            mounted() {
+                // 初始化Redactor富文本编辑器
+                $('#redactor').redactor({
+                    lang: 'zh_cn',
+                    buttons: ['html', 'formatting', 'bold', 'italic', 'unorderedlist', 'orderedlist', 'link', 'image'],
+                    placeholder: '请输入红色故事内容...'
+                });
+            },
+            methods: {
+                handleImageUpload(e) {
+                    this.story.image = e.target.files[0];
+                },
+                submitForm() {
+                    const formData = new FormData();
+                    formData.append('title', this.story.title);
+                    formData.append('content', this.story.content);
+                    if (this.story.image) {
+                        formData.append('image', this.story.image);
+                    }
+                    
+                    // 提交表单数据到后端
+                    axios.post('upload.php', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    .then(response => {
+                        if (response.data.success) {
+                            alert('上传成功！');
+                            window.location.href = 'index.html';
+                        } else {
+                            alert('上传失败：' + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('上传失败:', error);
+                        alert('上传失败，请重试！');
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
