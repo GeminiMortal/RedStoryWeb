@@ -2,7 +2,7 @@
 // 数据库配置
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "412412sl";
 $dbname = "red_story_db";
 
 // 创建数据库连接

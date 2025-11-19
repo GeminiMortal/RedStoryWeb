@@ -107,8 +107,8 @@
                         formData.append('image', this.story.image);
                     }
                     
-                    // 提交表单数据到后端PHP API
-                    axios.post('upload.php', formData, {
+                    // 提交表单数据到后端Node.js API
+                    axios.post('api/stories', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         }

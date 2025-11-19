@@ -57,11 +57,11 @@
             margin-bottom: 10px;
         }
         
-        /* 圆形上传按钮 */
+        /* 圆形上传按钮 - 右上角 */
         .upload-btn {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
             width: 50px;
             height: 50px;
@@ -78,7 +78,7 @@
         }
         
         .upload-btn .btn-text {
-            margin-left: 10px;
+            margin-right: 10px;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -110,24 +110,55 @@
         .carousel-container .row {
             flex: 1;
             display: flex;
+            flex-wrap: wrap;
         }
         
         .carousel-row {
             flex: 1;
+            min-width: 300px; /* 确保每行至少有300px宽度 */
             display: flex;
             flex-direction: column;
             height: 600px;
-            overflow-y: auto;
+            overflow: hidden; /* 隐藏溢出内容，实现轮播效果 */
             margin: 0 10px;
+            position: relative;
         }
         
-        .carousel-row:nth-child(2) {
-            direction: rtl;
+        /* 奇数行和偶数行轮播方向相反 */
+        .carousel-row:nth-child(odd) {
+            flex-direction: column;
+        }
+        
+        .carousel-row:nth-child(even) {
+            flex-direction: column-reverse;
+        }
+        
+        /* 轮播项样式 */
+        .carousel-item {
+            flex-shrink: 0;
+            width: 100%;
+            transition: transform 0.3s ease;
         }
         
         @media (max-width: 767px) {
             .carousel-row {
                 margin-bottom: 20px;
+                min-width: 100%; /* 移动端每行占满宽度 */
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            /* 在中等屏幕上，最多显示2行 */
+            .carousel-row:nth-child(3) {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            /* 在小屏幕上，只显示1行 */
+            .carousel-row:nth-child(2),
+            .carousel-row:nth-child(3) {
+                display: none;
             }
         }
     </style>
@@ -189,8 +220,8 @@
             },
             methods: {
                 loadStories() {
-                    // 使用Axios从PHP API获取红色故事数据
-                    axios.get('api/getStories.php')
+                    // 使用Axios从Node.js API获取红色故事数据
+                    axios.get('api/stories')
                         .then(response => {
                             const stories = response.data;
                             this.distributeStories(stories);
@@ -220,13 +251,40 @@
                     // 切换到下一个故事的逻辑
                     const row = this.stories[rowIndex];
                     const currentIndex = row.indexOf(currentStory);
-                    const nextIndex = (currentIndex + 1) % row.length;
+                    let nextIndex;
                     
-                    // 简单的动画效果
-                    $(`.carousel-row:eq(${rowIndex}) .carousel-item`).fadeOut(300, () => {
-                        // 这里可以实现更复杂的轮播逻辑
-                        $(`.carousel-row:eq(${rowIndex}) .carousel-item`).fadeIn(300);
-                    });
+                    // 奇数行和偶数行轮播方向相反
+                    if (rowIndex % 2 === 0) {
+                        // 偶数行（0, 2）向下轮播（下一个）
+                        nextIndex = (currentIndex + 1) % row.length;
+                    } else {
+                        // 奇数行（1）向上轮播（上一个）
+                        nextIndex = (currentIndex - 1 + row.length) % row.length;
+                    }
+                    
+                    // 获取当前轮播行
+                    const carouselRow = $(`.carousel-row:eq(${rowIndex})`);
+                    
+                    // 实现上下轮播动画
+                    const currentItem = carouselRow.find(`.carousel-item:eq(${currentIndex})`);
+                    const nextItem = carouselRow.find(`.carousel-item:eq(${nextIndex})`);
+                    
+                    // 根据行索引设置不同的轮播方向
+                    if (rowIndex % 2 === 0) {
+                        // 偶数行：当前项向上移出，下一项从下方移入
+                        currentItem.animate({ marginTop: '-100%', opacity: 0 }, 300, () => {
+                            currentItem.css({ marginTop: 0, opacity: 1 });
+                            // 将当前项移动到行末尾
+                            currentItem.appendTo(carouselRow);
+                        });
+                    } else {
+                        // 奇数行：当前项向下移出，下一项从上方移入
+                        currentItem.animate({ marginTop: '100%', opacity: 0 }, 300, () => {
+                            currentItem.css({ marginTop: 0, opacity: 1 });
+                            // 将当前项移动到行开头
+                            currentItem.prependTo(carouselRow);
+                        });
+                    }
                 }
             }
         }).mount('#app');
