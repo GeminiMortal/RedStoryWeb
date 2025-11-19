@@ -1,0 +1,12 @@
+{
+  "name": "red-story-web",
+  "version": "1.0.0",
+  "description": "红色故事展示网站",
+  "scripts": {
+    "build": "echo 'No build needed for static files'",
+    "dev": "echo 'Please open index.html directly in browser'"
+  },
+  "keywords": ["red-story", "vue", "php"],
+  "author": "",
+  "license": "MIT"
+}

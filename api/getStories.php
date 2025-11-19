@@ -2,41 +2,29 @@
 // 引入数据库配置
 require_once '../config.php';
 
-// 设置响应头
+// 设置响应头为JSON
 header('Content-Type: application/json; charset=utf-8');
 
-// 初始化响应数据
-$response = array('success' => false, 'stories' => array());
-
-// 准备SQL语句
-$sql = "SELECT * FROM stories ORDER BY created_at DESC";
-$result = $conn->query($sql);
-
-if ($result) {
-    // 检查是否有结果
+try {
+    // 查询所有故事，按创建时间降序排列
+    $sql = "SELECT * FROM stories ORDER BY created_at DESC";
+    $result = $conn->query($sql);
+    
+    $stories = array();
     if ($result->num_rows > 0) {
-        $stories = array();
-        
-        // 获取所有故事
+        // 输出每行数据
         while($row = $result->fetch_assoc()) {
             $stories[] = $row;
         }
-        
-        $response['success'] = true;
-        $response['stories'] = $stories;
-    } else {
-        $response['message'] = "没有找到红色故事";
     }
     
-    // 释放结果集
-    $result->free();
-} else {
-    $response['message'] = "查询失败: " . $conn->error;
+    // 返回JSON格式数据
+    echo json_encode($stories, JSON_UNESCAPED_UNICODE);
+    
+    // 关闭连接
+    $conn->close();
+} catch (Exception $e) {
+    // 返回错误信息
+    echo json_encode(array('error' => $e->getMessage()));
 }
-
-// 关闭数据库连接
-$conn->close();
-
-// 返回响应
-echo json_encode($response, JSON_UNESCAPED_UNICODE);
 ?>
