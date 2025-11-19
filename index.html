@@ -221,7 +221,7 @@
             methods: {
                 loadStories() {
                     // 使用Axios从Node.js API获取红色故事数据
-                    axios.get('api/stories')
+                    axios.get('http://localhost:3000/api/stories')
                         .then(response => {
                             const stories = response.data;
                             this.distributeStories(stories);
