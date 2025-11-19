@@ -2,14 +2,14 @@
 
 一个用于展示和上传红色故事的Web应用。
 
-## 技术栈
+## 1. 技术栈
 
-- **前端**: HTML5, CSS3, JavaScript, Vue.js 2, Bootstrap 5, jQuery, Font Awesome
-- **后端**: PHP 7+
+- **前端**: HTML5, CSS3, JavaScript, Vue.js 2, Bootstrap 5, jQuery, Font Awesome, Redactor (富文本编辑器)
+- **后端**: PHP 7.0+
 - **数据库**: MySQL 5.7+
-- **其他**: Axios (HTTP请求), Redactor (富文本编辑器)
+- **HTTP请求**: Axios
 
-## 项目结构
+## 2. 项目结构
 
 ```
 RedStoryWeb/
@@ -38,24 +38,25 @@ RedStoryWeb/
    - 图片大小限制为5MB
    - 自动将新故事添加到内容最少的轮播行
 
-## 安装和使用
+## 三、安装与使用
 
 ### 1. 环境要求
 
 - PHP 7.0 或更高版本
 - MySQL 5.7 或更高版本
 - Web服务器（如Apache、Nginx等）
+- 现代浏览器（支持HTML5、JavaScript）
 
 ### 2. 数据库配置
 
-1. 在MySQL中创建一个新的数据库，命名为 `red_stories`
+1. 在MySQL中创建一个新的数据库，命名为 `red_story_db`
 2. 编辑 `config.php` 文件，修改数据库连接信息：
 
 ```php
 $servername = "localhost";  // 数据库服务器地址
 $username = "root";         // 数据库用户名
 $password = "";             // 数据库密码
-$dbname = "red_stories";    // 数据库名称
+$dbname = "red_story_db";   // 数据库名称
 ```
 
 ### 3. 初始化数据库
@@ -74,9 +75,11 @@ http://localhost/RedStoryWeb/init_database.php
 http://localhost/RedStoryWeb/index.html
 ```
 
-## 数据库表结构
+## 数据结构
 
-### stories 表
+### 数据库表结构
+
+#### stories 表
 
 | 字段名 | 数据类型 | 描述 |
 |-------|---------|------|
