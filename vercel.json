@@ -3,22 +3,35 @@
   "buildCommand": "npm run build",
   "builds": [
     {
+      "src": "src/server.ts",
+      "use": "@vercel/node"
+    },
+    {
       "src": "*.html",
       "use": "@vercel/static"
     },
     {
-      "src": "*.php",
-      "use": "@vercel/php"
-    },
-    {
-      "src": "api/*.php",
-      "use": "@vercel/php"
+      "src": "uploads/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/api/stories",
+      "dest": "src/server.ts"
+    },
+    {
+      "src": "/api/stories/(.*)",
+      "dest": "src/server.ts"
+    },
+    {
+      "src": "/upload",
+      "dest": "src/server.ts"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
-  ]
+  ],
+  "outputDirectory": "dist"
 }
