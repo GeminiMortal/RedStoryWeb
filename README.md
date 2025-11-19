@@ -50,6 +50,83 @@
 npm install
 ```
 
+## Vercel部署与集成
+
+### 1. Vercel Blob配置
+
+Vercel Blob用于存储上传的图片文件。
+
+#### 步骤：
+1. 登录Vercel控制台
+2. 进入项目的Storage页面
+3. 创建一个Blob存储（已创建：`red-story-web-blob`）
+4. 获取Blob存储的**Read Write Token**
+5. 在.env文件中配置：
+
+```env
+# Vercel Blob Configuration
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-read-write-token
+BLOB_STORE_NAME=red-story-web-blob
+```
+
+### 2. Vercel Edge Config配置
+
+Edge Config用于存储应用配置，替代传统的.env文件。
+
+#### 步骤：
+1. 登录Vercel控制台
+2. 进入项目的Storage页面
+3. 创建一个Edge Config（已创建：`red-story-web-store`）
+4. 添加配置项：
+
+```json
+{
+  "appConfig": {
+    "dbHost": "localhost",
+    "dbUser": "root",
+    "dbPassword": "your-db-password",
+    "dbName": "red_story_db",
+    "port": 3000
+  }
+}
+```
+
+5. 在项目的Settings → Environment Variables中添加：
+
+```
+EDGE_CONFIG=your-edge-config-connection-string
+```
+
+### 3. 部署到Vercel
+
+```bash
+# 安装Vercel CLI
+npm install -g vercel
+
+# 登录Vercel
+vercel login
+
+# 部署项目
+vercel
+```
+
+## 配置说明
+
+### 环境变量
+
+项目使用以下环境变量：
+
+| 变量名 | 描述 | 默认值 |
+|--------|------|--------|
+| DB_HOST | 数据库主机地址 | localhost |
+| DB_USER | 数据库用户名 | root |
+| DB_PASSWORD | 数据库密码 | - |
+| DB_NAME | 数据库名称 | red_story_db |
+| PORT | 服务器端口 | 3000 |
+| BLOB_READ_WRITE_TOKEN | Vercel Blob读写令牌 | - |
+| BLOB_STORE_NAME | Vercel Blob存储名称 | red-story-web-blob |
+| EDGE_CONFIG | Edge Config连接字符串 | - |
+
 ### 2. 配置数据库
 
 在项目根目录创建 `.env` 文件，配置数据库连接信息：

@@ -1,15 +1,15 @@
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
+import { getConfigSync } from '../config/appConfig';
 
-// 加载环境变量
-dotenv.config();
+// 获取配置
+const config = getConfigSync();
 
 // 创建数据库连接池
-export const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'red_story_db',
+const pool = mysql.createPool({
+  host: config.dbHost,
+  user: config.dbUser,
+  password: config.dbPassword,
+  database: config.dbName,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -27,3 +27,5 @@ export const testConnection = async () => {
     throw error;
   }
 };
+
+export default pool;

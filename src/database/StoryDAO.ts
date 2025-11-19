@@ -1,4 +1,4 @@
-import { pool } from './connection';
+import pool from './connection';
 import { Story, CreateStoryRequest } from '../models/Story';
 
 export class StoryDAO {

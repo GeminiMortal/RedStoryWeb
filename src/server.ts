@@ -1,18 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import dotenv from 'dotenv';
+import { getConfigSync } from './config/appConfig';
 import { testConnection } from './database/connection';
 import storyRoutes from './routes/storyRoutes';
-
-// 加载环境变量
-dotenv.config();
 
 // 创建Express应用
 const app = express();
 
+// 获取配置
+const config = getConfigSync();
+
 // 配置端口
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 
 // 配置中间件
 app.use(cors()); // 允许跨域请求

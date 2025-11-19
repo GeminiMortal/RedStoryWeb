@@ -1,6 +1,6 @@
 import express from 'express';
 import { StoryDAO } from '../database/StoryDAO';
-import { upload } from '../config/uploadConfig';
+import { upload, uploadToBlob } from '../config/uploadConfig';
 
 const router = express.Router();
 const storyDAO = new StoryDAO();
@@ -46,8 +46,15 @@ router.post('/stories', upload.single('image'), async (req, res) => {
 
     // 处理上传的图片
     if (req.file) {
-      // 获取图片相对路径，与原PHP保持一致格式
-      imagePath = `uploads/${req.file.filename}`;
+      try {
+        // 上传到Vercel Blob
+        imagePath = await uploadToBlob(req.file);
+      } catch (error: any) {
+        return res.status(500).json({
+          success: false,
+          message: error.message || '图片上传失败'
+        });
+      }
     }
 
     // 创建故事
